@@ -2,9 +2,103 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="refresh" content="5">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Proxy Monitor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
-  <!-- Interfaz del panel de monitoreo del proxy -->
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1 class="title">Proxy Monitor</h1>
+        <p class="subtitle">Monitoreo en tiempo real del proxy HTTP/HTTPS</p>
+      </div>
+      <div class="actions">
+        <a class="btn" href="/exportar/csv">Descargar CSV</a>
+        <a class="btn" href="/exportar/json">Descargar JSON</a>
+      </div>
+    </div>
+
+    <section class="grid-cards">
+      <article class="card">
+        <div class="card-label">Total de solicitudes</div>
+        <div class="card-value">{{ metricas.total_solicitudes }}</div>
+        <div class="card-extra">Solicitudes atendidas por el proxy</div>
+      </article>
+
+      <article class="card">
+        <div class="card-label">Megabytes transferidos</div>
+        <div class="card-value">{{ metricas.total_mb }}</div>
+        <div class="card-extra">MB acumulados en la sesión actual</div>
+      </article>
+
+      <article class="card">
+        <div class="card-label">Solicitudes permitidas</div>
+        <div class="card-value">{{ metricas.solicitudes_permitidas }}</div>
+        <div class="card-extra">{{ metricas.porcentaje_permitidas }}% del total</div>
+      </article>
+
+      <article class="card">
+        <div class="card-label">Solicitudes bloqueadas</div>
+        <div class="card-value">{{ metricas.solicitudes_bloqueadas }}</div>
+        <div class="card-extra">{{ metricas.porcentaje_bloqueadas }}% del total</div>
+      </article>
+    </section>
+
+    <section class="grid-panels">
+      <article class="panel">
+        <h2>Top 5 dominios más visitados</h2>
+        {% if metricas.top5_dominios %}
+        <table>
+          <thead>
+            <tr>
+              <th>Dominio</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dominio, cantidad in metricas.top5_dominios %}
+            <tr>
+              <td>{{ dominio }}</td>
+              <td>{{ cantidad }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty">Todavía no hay solicitudes registradas.</div>
+        {% endif %}
+      </article>
+
+      <article class="panel">
+        <h2>Clientes activos</h2>
+        {% if metricas.clientes_activos %}
+        <table>
+          <thead>
+            <tr>
+              <th>IP</th>
+              <th>Solicitudes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ip, cantidad in metricas.clientes_activos %}
+            <tr>
+              <td>{{ ip }}</td>
+              <td>{{ cantidad }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty">Todavía no hay clientes activos.</div>
+        {% endif %}
+      </article>
+    </section>
+
+    <div class="footer-note">
+      La vista se actualiza automáticamente cada 5 segundos.
+    </div>
+  </div>
 </body>
 </html>
