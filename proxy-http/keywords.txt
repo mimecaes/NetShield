@@ -1,0 +1,12 @@
+# Lista de palabras clave bloqueadas en URLs HTTP
+# Una keyword por linea
+# Las lineas que empiezan con # son comentarios
+porn
+porno
+gambling
+tetas
+tetitas
+alex
+kounez
+hentai
+furry

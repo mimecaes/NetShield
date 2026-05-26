@@ -8,14 +8,16 @@ import os
 import re
 
 
-# Lista facil de editar para bloquear contenido por palabras clave en la URL.
-KEYWORDS_BLOQUEADAS = ["porn", "adult", "gambling"]
-
-
 def _archivo_blocked_path():
 	"""Retorna la ruta absoluta del archivo blocked.txt junto a este modulo."""
 
 	return os.path.join(os.path.dirname(os.path.abspath(__file__)), "blocked.txt")
+
+
+def _archivo_keywords_path():
+	"""Retorna la ruta absoluta del archivo keywords.txt junto a este modulo."""
+
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)), "keywords.txt")
 
 
 def _normalizar_host(host):
@@ -49,6 +51,29 @@ def load_blocked_domains():
 	return blocked_domains
 
 
+def load_keywords():
+	"""Lee keywords.txt y devuelve una lista con las palabras clave bloqueadas."""
+
+	keywords = []
+	path = _archivo_keywords_path()
+
+	if not os.path.exists(path):
+		print(f"[AVISO] No se encontro keywords.txt en: {path}. El filtro seguira permitiendo todo.")
+		return keywords
+
+	try:
+		with open(path, "r", encoding="utf-8") as file:
+			for raw_line in file:
+				line = raw_line.strip().lower()
+				if not line or line.startswith("#"):
+					continue
+				keywords.append(line)
+	except OSError as exc:
+		print(f"[AVISO] No se pudo leer keywords.txt: {exc}. El filtro seguira permitiendo todo.")
+
+	return keywords
+
+
 def is_domain_blocked(host, blocked_domains):
 	"""Verifica si el host o cualquiera de sus subdominios esta bloqueado."""
 
@@ -71,8 +96,9 @@ def is_keyword_blocked(url):
 	if not url:
 		return False
 
+	keywords_bloqueadas = load_keywords()
 	url_normalizada = str(url).lower()
-	for keyword in KEYWORDS_BLOQUEADAS:
+	for keyword in keywords_bloqueadas:
 		if re.search(re.escape(keyword.lower()), url_normalizada):
 			print(f"[BLOQUEADO] motivo: keyword → {keyword} encontrada en URL")
 			return True

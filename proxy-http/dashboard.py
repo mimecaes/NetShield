@@ -7,11 +7,12 @@ metricas del proxy en tiempo real.
 import os
 
 try:
-	from flask import Flask, jsonify, render_template, send_file
+	from flask import Flask, jsonify, render_template, request, send_file
 except Exception as exc:  # pragma: no cover - fallback defensivo
 	Flask = None
 	jsonify = None
 	render_template = None
+	request = None
 	send_file = None
 	print(f"[AVISO] Flask no esta disponible para el dashboard: {exc}")
 
@@ -67,6 +68,42 @@ def _archivo_csv_existe():
 	return os.path.exists(LOGS_CSV)
 
 
+def _ruta_archivo_texto(nombre_archivo):
+	"""Construye la ruta absoluta de un archivo de texto del panel."""
+
+	return os.path.join(os.path.dirname(os.path.abspath(__file__)), nombre_archivo)
+
+
+def _leer_archivo_texto(nombre_archivo):
+	"""Lee un archivo de texto del panel y retorna su contenido o una cadena vacia."""
+
+	path = _ruta_archivo_texto(nombre_archivo)
+
+	if not os.path.exists(path):
+		return ""
+
+	try:
+		with open(path, "r", encoding="utf-8") as file:
+			return file.read()
+	except OSError as exc:
+		print(f"[AVISO] No se pudo leer {nombre_archivo}: {exc}")
+		return ""
+
+
+def _guardar_archivo_texto(nombre_archivo, contenido):
+	"""Sobrescribe un archivo de texto del panel con el contenido recibido."""
+
+	path = _ruta_archivo_texto(nombre_archivo)
+
+	try:
+		with open(path, "w", encoding="utf-8") as file:
+			file.write(contenido)
+	except OSError as exc:
+		return False, f"No se pudo guardar {nombre_archivo}: {exc}"
+
+	return True, "Lista actualizada"
+
+
 if Flask is not None:
 	app = Flask(__name__, template_folder=os.path.join(APP_DIR, "templates"))
 else:  # pragma: no cover - fallback defensivo
@@ -103,6 +140,38 @@ if app is not None:
 		"""Devuelve las metricas actuales en formato JSON."""
 
 		return jsonify(_obtener_metricas_seguras())
+
+
+	@app.route("/blocked", methods=["GET", "POST"])
+	def blocked():
+		"""Lee o actualiza blocked.txt desde el panel."""
+
+		if request.method == "GET":
+			return jsonify({"contenido": _leer_archivo_texto("blocked.txt")})
+
+		payload = request.get_json(silent=True) or {}
+		contenido = payload.get("contenido", "")
+		exito, mensaje = _guardar_archivo_texto("blocked.txt", contenido)
+		if not exito:
+			return jsonify({"ok": False, "mensaje": mensaje}), 500
+
+		return jsonify({"ok": True, "mensaje": mensaje})
+
+
+	@app.route("/keywords", methods=["GET", "POST"])
+	def keywords():
+		"""Lee o actualiza keywords.txt desde el panel."""
+
+		if request.method == "GET":
+			return jsonify({"contenido": _leer_archivo_texto("keywords.txt")})
+
+		payload = request.get_json(silent=True) or {}
+		contenido = payload.get("contenido", "")
+		exito, mensaje = _guardar_archivo_texto("keywords.txt", contenido)
+		if not exito:
+			return jsonify({"ok": False, "mensaje": mensaje}), 500
+
+		return jsonify({"ok": True, "mensaje": mensaje})
 else:  # pragma: no cover - fallback defensivo
 
 	def inicio():

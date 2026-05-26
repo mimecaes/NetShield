@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="refresh" content="5">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Proxy Monitor</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
@@ -96,9 +95,150 @@
       </article>
     </section>
 
+    <section class="admin-section">
+      <div class="section-head">
+        <h2>Administrador de listas</h2>
+      </div>
+
+      <div class="admin-grid">
+        <article class="panel editor-panel">
+          <h3>Dominios bloqueados</h3>
+          <p class="editor-subtitle">Un dominio por línea. Aplica inmediatamente.</p>
+          <textarea id="editor-blocked" class="list-editor" spellcheck="false"></textarea>
+          <button id="btn-blocked" class="btn editor-btn" type="button">Guardar dominios</button>
+          <div id="msg-blocked" class="editor-message" aria-live="polite"></div>
+        </article>
+
+        <article class="panel editor-panel">
+          <h3>Palabras clave bloqueadas</h3>
+          <p class="editor-subtitle">Una keyword por línea. Solo aplica en HTTP.</p>
+          <textarea id="editor-keywords" class="list-editor" spellcheck="false"></textarea>
+          <button id="btn-keywords" class="btn editor-btn" type="button">Guardar keywords</button>
+          <div id="msg-keywords" class="editor-message" aria-live="polite"></div>
+        </article>
+      </div>
+    </section>
+
     <div class="footer-note">
       La vista se actualiza automáticamente cada 5 segundos.
     </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const blockedEditor = document.getElementById('editor-blocked');
+      const keywordsEditor = document.getElementById('editor-keywords');
+      const blockedButton = document.getElementById('btn-blocked');
+      const keywordsButton = document.getElementById('btn-keywords');
+      const blockedMessage = document.getElementById('msg-blocked');
+      const keywordsMessage = document.getElementById('msg-keywords');
+
+      let autoReloadTimer = null;
+      let activeEditors = 0;
+      const messageTimers = new Map();
+
+      function scheduleReload() {
+        clearTimeout(autoReloadTimer);
+        if (activeEditors > 0) {
+          return;
+        }
+
+        autoReloadTimer = setTimeout(() => {
+          window.location.reload();
+        }, 5000);
+      }
+
+      function pauseReload() {
+        clearTimeout(autoReloadTimer);
+      }
+
+      function maybeResumeReload() {
+        if (activeEditors === 0) {
+          scheduleReload();
+        }
+      }
+
+      function showMessage(element, message, isError) {
+        const previousTimer = messageTimers.get(element);
+        if (previousTimer) {
+          window.clearTimeout(previousTimer);
+        }
+
+        element.textContent = message;
+        element.classList.toggle('error', Boolean(isError));
+        element.classList.toggle('success', !isError);
+
+        const timerId = window.setTimeout(() => {
+          element.textContent = '';
+          element.classList.remove('error', 'success');
+          messageTimers.delete(element);
+        }, 3000);
+
+        messageTimers.set(element, timerId);
+      }
+
+      async function loadEditor(endpoint, editor) {
+        try {
+          const response = await fetch(endpoint);
+          const data = await response.json();
+          editor.value = data.contenido || '';
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      async function saveEditor(endpoint, editor, messageElement) {
+        pauseReload();
+
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ contenido: editor.value }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.ok) {
+            throw new Error(data.mensaje || 'No se pudo actualizar la lista');
+          }
+
+          showMessage(messageElement, data.mensaje || 'Lista actualizada', false);
+        } catch (error) {
+          showMessage(messageElement, error.message || 'No se pudo guardar la lista', true);
+        } finally {
+          maybeResumeReload();
+        }
+      }
+
+      function bindEditor(editor, button, endpoint, messageElement) {
+        editor.addEventListener('focusin', () => {
+          activeEditors += 1;
+          pauseReload();
+        });
+
+        editor.addEventListener('focusout', () => {
+          activeEditors = Math.max(0, activeEditors - 1);
+          maybeResumeReload();
+        });
+
+        button.addEventListener('click', () => {
+          saveEditor(endpoint, editor, messageElement);
+        });
+      }
+
+      bindEditor(blockedEditor, blockedButton, '/blocked', blockedMessage);
+      bindEditor(keywordsEditor, keywordsButton, '/keywords', keywordsMessage);
+
+      Promise.all([
+        loadEditor('/blocked', blockedEditor),
+        loadEditor('/keywords', keywordsEditor),
+      ]).finally(() => {
+        scheduleReload();
+      });
+    });
+  </script>
 </body>
 </html>

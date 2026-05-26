@@ -69,6 +69,74 @@ body {
   transform: translateY(-1px);
 }
 
+.admin-section {
+  margin-top: 22px;
+}
+
+.section-head h2 {
+  margin: 0 0 14px;
+  font-size: 1.15rem;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.editor-panel h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.editor-subtitle {
+  margin: 8px 0 12px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.list-editor {
+  width: 100%;
+  min-height: 150px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: #fff;
+}
+
+.list-editor:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.editor-btn {
+  margin-top: 10px;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.editor-message {
+  min-height: 1.1em;
+  margin-top: 10px;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.editor-message.success {
+  color: #15803d;
+}
+
+.editor-message.error {
+  color: #b91c1c;
+}
+
 .grid-cards {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -160,7 +228,8 @@ tbody tr:last-child td {
 
 @media (max-width: 980px) {
   .grid-cards,
-  .grid-panels {
+  .grid-panels,
+  .admin-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -172,7 +241,8 @@ tbody tr:last-child td {
   }
 
   .grid-cards,
-  .grid-panels {
+  .grid-panels,
+  .admin-grid {
     grid-template-columns: 1fr;
   }
 
