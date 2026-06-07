@@ -1,244 +1,135 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Proxy Monitor</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="10">
+  <title>NetShield - Panel de Monitoreo</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
-  <div class="wrap">
-    <div class="header">
+  <div class="contenedor">
+
+    <div class="encabezado">
+      <h1>NetShield &mdash; Panel de Monitoreo</h1>
       <div>
-        <h1 class="title">Proxy Monitor</h1>
-        <p class="subtitle">Monitoreo en tiempo real del proxy HTTP/HTTPS</p>
-      </div>
-      <div class="actions">
         <a class="btn" href="/exportar/csv">Descargar CSV</a>
-        <a class="btn" href="/exportar/json">Descargar JSON</a>
+        <a class="btn" href="/exportar/json">Ver JSON</a>
       </div>
     </div>
 
-    <section class="grid-cards">
-      <article class="card">
-        <div class="card-label">Total de solicitudes</div>
-        <div class="card-value">{{ metricas.total_solicitudes }}</div>
-        <div class="card-extra">Solicitudes atendidas por el proxy</div>
-      </article>
+    <div class="tarjetas">
+      <div class="tarjeta">
+        <div class="etiqueta">Total de solicitudes</div>
+        <div class="valor">{{ metricas.total_solicitudes }}</div>
+      </div>
+      <div class="tarjeta">
+        <div class="etiqueta">Datos transferidos</div>
+        <div class="valor">{{ metricas.total_mb }} MB</div>
+      </div>
+      <div class="tarjeta">
+        <div class="etiqueta">Permitidas</div>
+        <div class="valor">{{ metricas.solicitudes_permitidas }}</div>
+        <div class="extra">{{ metricas.porcentaje_permitidas }}%</div>
+      </div>
+      <div class="tarjeta">
+        <div class="etiqueta">Bloqueadas</div>
+        <div class="valor">{{ metricas.solicitudes_bloqueadas }}</div>
+        <div class="extra">{{ metricas.porcentaje_bloqueadas }}%</div>
+      </div>
+    </div>
 
-      <article class="card">
-        <div class="card-label">Megabytes transferidos</div>
-        <div class="card-value">{{ metricas.total_mb }}</div>
-        <div class="card-extra">MB acumulados en la sesión actual</div>
-      </article>
-
-      <article class="card">
-        <div class="card-label">Solicitudes permitidas</div>
-        <div class="card-value">{{ metricas.solicitudes_permitidas }}</div>
-        <div class="card-extra">{{ metricas.porcentaje_permitidas }}% del total</div>
-      </article>
-
-      <article class="card">
-        <div class="card-label">Solicitudes bloqueadas</div>
-        <div class="card-value">{{ metricas.solicitudes_bloqueadas }}</div>
-        <div class="card-extra">{{ metricas.porcentaje_bloqueadas }}% del total</div>
-      </article>
-    </section>
-
-    <section class="grid-panels">
-      <article class="panel">
-        <h2>Top 5 dominios más visitados</h2>
+    <div class="paneles">
+      <div class="panel">
+        <h2>Top 5 dominios m&aacute;s visitados</h2>
         {% if metricas.top5_dominios %}
         <table>
           <thead>
-            <tr>
-              <th>Dominio</th>
-              <th>Cantidad</th>
-            </tr>
+            <tr><th>Dominio</th><th>Solicitudes</th></tr>
           </thead>
           <tbody>
             {% for dominio, cantidad in metricas.top5_dominios %}
-            <tr>
-              <td>{{ dominio }}</td>
-              <td>{{ cantidad }}</td>
-            </tr>
+            <tr><td>{{ dominio }}</td><td>{{ cantidad }}</td></tr>
             {% endfor %}
           </tbody>
         </table>
         {% else %}
-        <div class="empty">Todavía no hay solicitudes registradas.</div>
+        <p class="vacio">Sin solicitudes aun.</p>
         {% endif %}
-      </article>
+      </div>
 
-      <article class="panel">
+      <div class="panel">
         <h2>Clientes activos</h2>
         {% if metricas.clientes_activos %}
         <table>
           <thead>
-            <tr>
-              <th>IP</th>
-              <th>Solicitudes</th>
-            </tr>
+            <tr><th>IP</th><th>Solicitudes</th></tr>
           </thead>
           <tbody>
             {% for ip, cantidad in metricas.clientes_activos %}
-            <tr>
-              <td>{{ ip }}</td>
-              <td>{{ cantidad }}</td>
-            </tr>
+            <tr><td>{{ ip }}</td><td>{{ cantidad }}</td></tr>
             {% endfor %}
           </tbody>
         </table>
         {% else %}
-        <div class="empty">Todavía no hay clientes activos.</div>
+        <p class="vacio">Sin clientes aun.</p>
         {% endif %}
-      </article>
-    </section>
-
-    <section class="admin-section">
-      <div class="section-head">
-        <h2>Administrador de listas</h2>
       </div>
-
-      <div class="admin-grid">
-        <article class="panel editor-panel">
-          <h3>Dominios bloqueados</h3>
-          <p class="editor-subtitle">Un dominio por línea. Aplica inmediatamente.</p>
-          <textarea id="editor-blocked" class="list-editor" spellcheck="false"></textarea>
-          <button id="btn-blocked" class="btn editor-btn" type="button">Guardar dominios</button>
-          <div id="msg-blocked" class="editor-message" aria-live="polite"></div>
-        </article>
-
-        <article class="panel editor-panel">
-          <h3>Palabras clave bloqueadas</h3>
-          <p class="editor-subtitle">Una keyword por línea. Solo aplica en HTTP.</p>
-          <textarea id="editor-keywords" class="list-editor" spellcheck="false"></textarea>
-          <button id="btn-keywords" class="btn editor-btn" type="button">Guardar keywords</button>
-          <div id="msg-keywords" class="editor-message" aria-live="polite"></div>
-        </article>
-      </div>
-    </section>
-
-    <div class="footer-note">
-      La vista se actualiza automáticamente cada 5 segundos.
     </div>
+
+    <div class="admin">
+      <h2>Administrar listas de bloqueo</h2>
+      <div class="admin-grid">
+        <div class="panel">
+          <h3>Dominios bloqueados</h3>
+          <p class="subtitulo">Un dominio por linea. Se aplica de inmediato.</p>
+          <textarea id="editor-blocked" class="editor" spellcheck="false"></textarea>
+          <button id="btn-blocked" class="btn" type="button">Guardar dominios</button>
+          <span id="msg-blocked" class="mensaje"></span>
+        </div>
+        <div class="panel">
+          <h3>Palabras clave bloqueadas</h3>
+          <p class="subtitulo">Una keyword por linea. Solo aplica en HTTP.</p>
+          <textarea id="editor-keywords" class="editor" spellcheck="false"></textarea>
+          <button id="btn-keywords" class="btn" type="button">Guardar keywords</button>
+          <span id="msg-keywords" class="mensaje"></span>
+        </div>
+      </div>
+    </div>
+
+    <p class="nota">Actualizacion automatica cada 10 segundos.</p>
+
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const blockedEditor = document.getElementById('editor-blocked');
-      const keywordsEditor = document.getElementById('editor-keywords');
-      const blockedButton = document.getElementById('btn-blocked');
-      const keywordsButton = document.getElementById('btn-keywords');
-      const blockedMessage = document.getElementById('msg-blocked');
-      const keywordsMessage = document.getElementById('msg-keywords');
+    async function cargar(endpoint, editor) {
+      const res = await fetch(endpoint);
+      const data = await res.json();
+      editor.value = data.contenido || "";
+    }
 
-      let autoReloadTimer = null;
-      let activeEditors = 0;
-      const messageTimers = new Map();
-
-      function scheduleReload() {
-        clearTimeout(autoReloadTimer);
-        if (activeEditors > 0) {
-          return;
-        }
-
-        autoReloadTimer = setTimeout(() => {
-          window.location.reload();
-        }, 5000);
-      }
-
-      function pauseReload() {
-        clearTimeout(autoReloadTimer);
-      }
-
-      function maybeResumeReload() {
-        if (activeEditors === 0) {
-          scheduleReload();
-        }
-      }
-
-      function showMessage(element, message, isError) {
-        const previousTimer = messageTimers.get(element);
-        if (previousTimer) {
-          window.clearTimeout(previousTimer);
-        }
-
-        element.textContent = message;
-        element.classList.toggle('error', Boolean(isError));
-        element.classList.toggle('success', !isError);
-
-        const timerId = window.setTimeout(() => {
-          element.textContent = '';
-          element.classList.remove('error', 'success');
-          messageTimers.delete(element);
-        }, 3000);
-
-        messageTimers.set(element, timerId);
-      }
-
-      async function loadEditor(endpoint, editor) {
-        try {
-          const response = await fetch(endpoint);
-          const data = await response.json();
-          editor.value = data.contenido || '';
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
-      async function saveEditor(endpoint, editor, messageElement) {
-        pauseReload();
-
-        try {
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ contenido: editor.value }),
-          });
-
-          const data = await response.json();
-
-          if (!response.ok || !data.ok) {
-            throw new Error(data.mensaje || 'No se pudo actualizar la lista');
-          }
-
-          showMessage(messageElement, data.mensaje || 'Lista actualizada', false);
-        } catch (error) {
-          showMessage(messageElement, error.message || 'No se pudo guardar la lista', true);
-        } finally {
-          maybeResumeReload();
-        }
-      }
-
-      function bindEditor(editor, button, endpoint, messageElement) {
-        editor.addEventListener('focusin', () => {
-          activeEditors += 1;
-          pauseReload();
-        });
-
-        editor.addEventListener('focusout', () => {
-          activeEditors = Math.max(0, activeEditors - 1);
-          maybeResumeReload();
-        });
-
-        button.addEventListener('click', () => {
-          saveEditor(endpoint, editor, messageElement);
-        });
-      }
-
-      bindEditor(blockedEditor, blockedButton, '/blocked', blockedMessage);
-      bindEditor(keywordsEditor, keywordsButton, '/keywords', keywordsMessage);
-
-      Promise.all([
-        loadEditor('/blocked', blockedEditor),
-        loadEditor('/keywords', keywordsEditor),
-      ]).finally(() => {
-        scheduleReload();
+    async function guardar(endpoint, editor, msg) {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contenido: editor.value })
       });
-    });
+      const data = await res.json();
+      msg.textContent = data.mensaje;
+      setTimeout(() => { msg.textContent = ""; }, 3000);
+    }
+
+    const blockedEditor  = document.getElementById("editor-blocked");
+    const keywordsEditor = document.getElementById("editor-keywords");
+    const msgBlocked     = document.getElementById("msg-blocked");
+    const msgKeywords    = document.getElementById("msg-keywords");
+
+    document.getElementById("btn-blocked").addEventListener("click",
+      () => guardar("/blocked", blockedEditor, msgBlocked));
+    document.getElementById("btn-keywords").addEventListener("click",
+      () => guardar("/keywords", keywordsEditor, msgKeywords));
+
+    cargar("/blocked", blockedEditor);
+    cargar("/keywords", keywordsEditor);
   </script>
 </body>
 </html>
