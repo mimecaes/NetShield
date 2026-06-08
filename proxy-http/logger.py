@@ -28,13 +28,13 @@ def log_request(ip, host, url, metodo, estado, bytes_transferidos):
     estado_texto = "bloqueado" if bloqueado else "permitido"
     bytes_val = 0 if bloqueado else int(bytes_transferidos)
 
-    try:
-        with open(LOGS_CSV, "a", newline="", encoding="utf-8") as f:
-            csv.writer(f).writerow([timestamp, ip, url or host, metodo, estado_texto, bytes_val])
-    except:
-        pass
-
     with _lock:
+        try:
+            with open(LOGS_CSV, "a", newline="", encoding="utf-8") as f:
+                csv.writer(f).writerow([timestamp, ip, url or host, metodo, estado_texto, bytes_val])
+        except:
+            pass
+
         _metricas["total"] += 1
         _metricas["bytes"] += bytes_val
         if bloqueado:
