@@ -9,7 +9,6 @@ def main():
     print("Proxy HTTP - NetShield")
     print("Proxy:  localhost:8080")
     print("Panel:  http://localhost:8081")
-    print("Ctrl+C para detener")
     print("========================================")
 
     t1 = threading.Thread(target=iniciar_proxy, daemon=True)
