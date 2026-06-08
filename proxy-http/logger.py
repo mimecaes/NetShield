@@ -16,7 +16,6 @@ _metricas = {
     "clientes": {},
 }
 
-# Crear archivo CSV con cabecera si no existe
 if not os.path.exists(LOGS_CSV):
     with open(LOGS_CSV, "w", newline="", encoding="utf-8") as f:
         csv.writer(f).writerow(["timestamp", "ip_cliente", "url", "metodo", "estado", "bytes"])

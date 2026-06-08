@@ -311,7 +311,6 @@ def manejar_https(cliente, host, puerto):
         if primer_paquete:
             upstream.sendall(primer_paquete)
 
-        # Relay bidireccional; solo contamos bytes servidor->cliente
         t1 = threading.Thread(target=relay, args=(cliente, upstream), daemon=True)
         t2 = threading.Thread(target=relay, args=(upstream, cliente, bytes_al_cliente, lock), daemon=True)
         t1.start()
